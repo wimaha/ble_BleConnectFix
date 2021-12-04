@@ -3,8 +3,8 @@ package darwin
 import (
 	"fmt"
 
-	"github.com/go-ble/ble"
 	"github.com/JuulLabs-OSS/cbgo"
+	"github.com/go-ble/ble"
 )
 
 // A Client is a GATT client.
@@ -313,22 +313,7 @@ func (cln *Client) WriteDescriptor(d *ble.Descriptor, b []byte) error {
 
 // ReadRSSI retrieves the current RSSI value of remote peripheral. [Vol 2, Part E, 7.5.4]
 func (cln *Client) ReadRSSI() int {
-	ch := cln.conn.evl.rssiRead.Listen()
-	defer cln.conn.evl.rssiRead.Close()
-
-	cln.conn.prph.ReadRSSI()
-
-	select {
-	case itf := <-ch:
-		ev := itf.(*eventRSSIRead)
-		if ev.err != nil {
-			return 0
-		}
-		return ev.rssi
-
-	case <-cln.Disconnected():
-		return 0
-	}
+	return cln.conn.ReadRSSI()
 }
 
 // ExchangeMTU set the ATT_MTU to the maximum possible value that can be
