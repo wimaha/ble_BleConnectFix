@@ -11,5 +11,5 @@ require (
 	github.com/raff/goble v0.0.0-20190909174656-72afc67d6a99
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/urfave/cli v1.22.2
-	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae
+	golang.org/x/sys v0.0.0-20211204120058-94396e421777
 )
