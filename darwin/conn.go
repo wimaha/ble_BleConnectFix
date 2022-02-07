@@ -6,8 +6,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/go-ble/ble"
 	"github.com/JuulLabs-OSS/cbgo"
+	"github.com/go-ble/ble"
 )
 
 // newGenConn creates a new generic (role-less) connection.  This should not be
@@ -140,6 +140,23 @@ func (c *conn) Close() error {
 // Disconnected returns a receiving channel, which is closed when the connection disconnects.
 func (c *conn) Disconnected() <-chan struct{} {
 	return c.done
+}
+
+// ReadRSSI retrieves the current RSSI value of remote peripheral. [Vol 2, Part E, 7.5.4]
+func (c *conn) ReadRSSI() int {
+	ch := c.evl.rssiRead.Listen()
+	defer c.evl.rssiRead.Close()
+
+	c.prph.ReadRSSI()
+
+	select {
+	case itf := <-ch:
+		ev := itf.(*eventRSSIRead)
+		if ev.err != nil {
+			return 0
+		}
+		return ev.rssi
+	}
 }
 
 // processChrRead handles an incoming read response.  CoreBluetooth does not
