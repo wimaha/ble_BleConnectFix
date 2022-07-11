@@ -56,8 +56,6 @@ func (a *Advertisement) LocalName() string {
 	if a.packets().LocalName() != "" {
 		return a.packets().LocalName()
 	}
-	// sometimes name can be found in scan response packet, e.g. in Teltonika beacons:
-	// https://wiki.teltonika-gps.com/view/EYE_SENSOR_/_BTSMP1#Protocol_description
 	if a.sr != nil && a.sr.LocalName() != "" {
 		return a.sr.LocalName()
 	}
