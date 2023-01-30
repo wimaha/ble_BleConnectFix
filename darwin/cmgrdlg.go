@@ -6,8 +6,8 @@
 package darwin
 
 import (
-	"github.com/go-ble/ble"
 	"github.com/JuulLabs-OSS/cbgo"
+	"github.com/go-ble/ble"
 )
 
 func (d *Device) CentralManagerDidUpdateState(cmgr cbgo.CentralManager) {
@@ -17,7 +17,15 @@ func (d *Device) CentralManagerDidUpdateState(cmgr cbgo.CentralManager) {
 func (d *Device) DidDiscoverPeripheral(cmgr cbgo.CentralManager, prph cbgo.Peripheral,
 	advFields cbgo.AdvFields, rssi int) {
 
-	if d.advHandler == nil {
+	// The Scan operation is happening in another goroutine. If a scan is still in progress,
+	// a chan receive operation on d.advCh will give us a guaranteed-good channel on which
+	// we can report this result. If the Scan operation is over, this channel will be closed
+	// and we can return early.
+	d.connLock.Lock()
+	advCh := d.advCh
+	d.connLock.Unlock()
+	ch := <-advCh
+	if ch == nil {
 		return
 	}
 
@@ -43,7 +51,7 @@ func (d *Device) DidDiscoverPeripheral(cmgr cbgo.CentralManager, prph cbgo.Perip
 	}
 	a.peerUUID = ble.UUID(prph.Identifier())
 
-	d.advHandler(a)
+	ch <- a
 }
 
 func (d *Device) DidConnectPeripheral(cmgr cbgo.CentralManager, prph cbgo.Peripheral) {
